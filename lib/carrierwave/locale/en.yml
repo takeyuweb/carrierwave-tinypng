@@ -1,0 +1,4 @@
+en:
+  errors:
+    messages:
+      tinypng_processing_error: "Failed to process file with TinyPNG. Original Error: %{error} %{message}"
