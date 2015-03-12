@@ -47,3 +47,22 @@ module CarrierWave
     end
   end
 end
+
+if defined?(Rails)
+  module CarrierWave
+    module TinyPNG
+      class Railtie < Rails::Railtie
+        initializer 'carrierwave_tinypng.setup_paths' do |app|
+          available_locales = app.config.i18n.available_locales.present? ?
+              [app.config.i18n.available_locales].flatten : []
+          available_locales_pattern = available_locales.empty? ?
+              '*' : "{#{ available_locales.join(',') }}"
+          files = Dir[File.join(File.dirname(__FILE__),
+                                'locale',
+                                "#{available_locales_pattern}.yml")]
+          I18n.load_path = files.concat(I18n.load_path)
+        end
+      end
+    end
+  end
+end
