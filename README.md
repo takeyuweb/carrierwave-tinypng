@@ -1,4 +1,4 @@
-# Carrierwave::Tinypng
+# CarrierWave::TinyPNG
 
 TinyPNG support for CarrierWave
 
