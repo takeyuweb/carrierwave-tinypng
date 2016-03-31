@@ -32,16 +32,18 @@ module CarrierWave
         source = Tinify.from_file(input)
         source.to_file(output)
       rescue => e
-        raise CarrierWave::ProcessingError,
-              I18n.translate(
-                :'errors.messages.tinypng_processing_error',
-                :error => e.class.to_s,
-                :message => e.message.to_s,
-                :default => I18n.translate(
-                  :'errors.messages.tinypng_processing_error',
-                  :locale => :en
-                )
-              )
+        input
+
+        Rails.logger.error
+          I18n.translate(
+            :'errors.messages.tinypng_processing_error',
+            :error => e.class.to_s,
+            :message => e.message.to_s,
+            :default => I18n.translate(
+              :'errors.messages.tinypng_processing_error',
+              :locale => :en
+            )
+          )
       end
     end
   end
