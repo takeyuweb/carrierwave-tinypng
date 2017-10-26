@@ -2,6 +2,8 @@ require "carrierwave/tinypng/version"
 
 require 'net/https'
 require 'uri'
+require "tinify"
+
 module CarrierWave
   module TinyPNG
 
@@ -20,29 +22,26 @@ module CarrierWave
     def tinypng
       cache_stored_file! if !cached?
 
-      key = CarrierWave::TinyPNG.configuration.key
       input = current_path
       output = current_path
 
-      uri = URI.parse('https://api.tinypng.com/shrink')
+      Tinify.key = CarrierWave::TinyPNG.configuration.key
+      Tinify.validate!
 
-      http = Net::HTTP.new(uri.host, uri.port)
-      http.use_ssl = true
+      begin
+        source = Tinify.from_file(input)
+        source.to_file(output)
+      rescue => e
+        Rails.logger.error(
+          I18n.translate(
+            :'errors.messages.tinypng_processing_error',
+            error: e.class.to_s,
+            message: e.message.to_s,
+            default: I18n.translate(:'errors.messages.tinypng_processing_error', locale: :en)
+          )
+        )
 
-      request = Net::HTTP::Post.new(uri.request_uri)
-      request.basic_auth('api', key)
-
-      response = http.request(request, File.binread(input))
-      json = JSON.parse(response.body, :symbolize_names => true) || {}
-      if response.code == '201'
-        File.binwrite(output, http.get(response['location']).body)
-      else
-        raise CarrierWave::ProcessingError,
-              I18n.translate(:'errors.messages.tinypng_processing_error',
-                             :error => json[:error],
-                             :message => json[:message],
-                             :default => I18n.translate(:'errors.messages.tinypng_processing_error',
-                                                        :locale => :en))
+        return input
       end
     end
   end
